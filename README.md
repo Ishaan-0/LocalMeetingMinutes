@@ -23,4 +23,5 @@ npm start stop     # stop and process
 Also create a `.env.example` file so other users know what environment variables they need:
 ```
 NOTION_TOKEN=your_notion_integration_token
+
 NOTION_DATABASE_ID=your_database_id
