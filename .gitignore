@@ -1,0 +1,25 @@
+# Dependencies
+node_modules/
+
+# Environment variables - never commit these
+.env
+
+# Temp folder - audio files and pid files
+temp/
+
+# TypeScript compiled output
+dist/
+
+# Source maps
+*.js.map
+
+# macOS junk files
+.DS_Store
+
+# VS Code settings (optional - some teams commit these)
+.vscode/
+
+# TypeScript build info
+*.tsbuildinfo
+
+._*  # Ignore any file starting with ._ (macOS resource forks)
