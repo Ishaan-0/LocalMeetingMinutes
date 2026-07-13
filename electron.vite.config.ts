@@ -12,10 +12,5 @@ export default defineConfig({
       }
     },
     plugins: [react()],
-    test: {
-      environment: 'jsdom',
-      globals: true,
-      setupFiles: ['./src/renderer/src/test-setup.ts']
-    }
   }
 })
