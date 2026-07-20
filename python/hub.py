@@ -21,7 +21,7 @@ DIARIZE_MIN_SECONDS = 15.0
 
 async def main(socket_path: str, ws_port: int, hf_token: str, ollama_url: str, ollama_model: str) -> None:
     executor = ThreadPoolExecutor(max_workers=2)
-    loop = asyncio.get_event_loop()
+    loop = asyncio.get_running_loop()
 
     print("Loading ML models...", flush=True)
     vad = VAD()
@@ -121,7 +121,7 @@ async def main(socket_path: str, ws_port: int, hf_token: str, ollama_url: str, o
         await ws.broadcast({"type": "error", "message": f"Summarization failed: {e}"})
 
     await ws.stop()
-    executor.shutdown(wait=False)
+    executor.shutdown(wait=True)
 
 
 if __name__ == "__main__":
