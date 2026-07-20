@@ -13,6 +13,8 @@
 		ED543E35BB314E1BBC90B26E /* WhisperKit in Frameworks */ = {isa = PBXBuildFile; productRef = B1834720DBCD4A01A4CD53BA /* WhisperKit */; };
 		AA11BB22CC33DD44EE55FF66 /* AudioRingBuffer.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA11BB22CC33DD44EE55FF01 /* AudioRingBuffer.swift */; };
 		AA11BB22CC33DD44EE55FF67 /* AudioCaptureManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA11BB22CC33DD44EE55FF02 /* AudioCaptureManager.swift */; };
+		CC44DD55EE66FF7700112231 /* TranscriptSegment.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC44DD55EE66FF7700112201 /* TranscriptSegment.swift */; };
+		CC44DD55EE66FF7700112232 /* TranscriptionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC44DD55EE66FF7700112202 /* TranscriptionManager.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -24,6 +26,8 @@
 		B4275F32D1B9422E99AB51CA /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		AA11BB22CC33DD44EE55FF01 /* AudioRingBuffer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioRingBuffer.swift; sourceTree = "<group>"; };
 		AA11BB22CC33DD44EE55FF02 /* AudioCaptureManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioCaptureManager.swift; sourceTree = "<group>"; };
+		CC44DD55EE66FF7700112201 /* TranscriptSegment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TranscriptSegment.swift; sourceTree = "<group>"; };
+		CC44DD55EE66FF7700112202 /* TranscriptionManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TranscriptionManager.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -67,11 +71,29 @@
 			children = (
 				807BF055217C477C86E2F77A /* App */,
 				AA11BB22CC33DD44EE55FF03 /* Audio */,
+				CC44DD55EE66FF7700112210 /* Models */,
+				CC44DD55EE66FF7700112220 /* Transcription */,
 				FAEFE20428884A87BA3BF94F /* Views */,
 				A042BB8E0286411DA3CD1C16 /* MeetingMinutes.entitlements */,
 				B4275F32D1B9422E99AB51CA /* Info.plist */,
 			);
 			path = MeetingMinutes;
+			sourceTree = "<group>";
+		};
+		CC44DD55EE66FF7700112210 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				CC44DD55EE66FF7700112201 /* TranscriptSegment.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		CC44DD55EE66FF7700112220 /* Transcription */ = {
+			isa = PBXGroup;
+			children = (
+				CC44DD55EE66FF7700112202 /* TranscriptionManager.swift */,
+			);
+			path = Transcription;
 			sourceTree = "<group>";
 		};
 		AA11BB22CC33DD44EE55FF03 /* Audio */ = {
@@ -179,6 +201,8 @@
 				A06AF5CD882C4E598B7B36B7 /* MenuBarView.swift in Sources */,
 				AA11BB22CC33DD44EE55FF66 /* AudioRingBuffer.swift in Sources */,
 				AA11BB22CC33DD44EE55FF67 /* AudioCaptureManager.swift in Sources */,
+				CC44DD55EE66FF7700112231 /* TranscriptSegment.swift in Sources */,
+				CC44DD55EE66FF7700112232 /* TranscriptionManager.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
