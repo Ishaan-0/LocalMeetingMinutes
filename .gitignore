@@ -1,6 +1,8 @@
 # macOS
 .DS_Store
 
+.superpowers/sdd
+
 # Xcode
 *.xcodeproj/xcuserdata/
 *.xcworkspace/xcuserdata/
