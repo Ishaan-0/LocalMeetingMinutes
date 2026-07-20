@@ -16,7 +16,7 @@ xcuserdata/
 
 # Swift Package Manager
 .build/
-*.resolved
+# Note: Package.resolved is committed for reproducible builds
 
 # ML Models (downloaded on first launch, not committed)
 MeetingMinutes/Models/
