@@ -12,7 +12,9 @@ enum WhisperModelSize: String, CaseIterable {
 
 /// Loads a WhisperKit model from the local Models directory and transcribes
 /// buffered audio chunks in 5-second windows (80 000 samples @ 16 kHz).
-@MainActor
+///
+/// Not isolated to `@MainActor` — WhisperKit inference is CPU/ANE-bound and
+/// can take 1–3 seconds; callers run it off the main actor via `async`.
 final class TranscriptionManager: ObservableObject {
 
     // MARK: - Constants
@@ -36,11 +38,11 @@ final class TranscriptionManager: ObservableObject {
     ///
     /// - Parameters:
     ///   - size: Which model variant to load.
-    ///   - progress: Called on the main actor with values in [0, 1] as the
-    ///     model components finish loading. WhisperKit does not surface
-    ///     granular progress, so we emit 0.0 at start and 1.0 on completion.
+    ///   - progress: Called with values in [0, 1] as the model components
+    ///     finish loading. WhisperKit does not surface granular progress, so
+    ///     we emit 0.0 at start and 1.0 on completion.
     func loadModel(size: WhisperModelSize, progress: @escaping (Double) -> Void) async throws {
-        progress(0.0)
+        await MainActor.run { progress(0.0) }
 
         let appSupport = FileManager.default
             .urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
@@ -57,19 +59,19 @@ final class TranscriptionManager: ObservableObject {
         )
 
         whisperKit = try await WhisperKit(config)
-        progress(1.0)
+        await MainActor.run { progress(1.0) }
     }
 
-    /// Appends `samples` to an internal buffer.  When the buffer reaches
-    /// 5 seconds (80 000 samples) it is flushed through WhisperKit and the
-    /// resulting `TranscriptSegment` array is returned.  Returns an empty
-    /// array if the buffer has not yet filled.
+    /// Appends `samples` to an internal buffer.  Drains **all** full 5-second
+    /// windows (80 000 samples each) through WhisperKit, accumulating their
+    /// segments into one array.  Returns an empty array if no full window is
+    /// ready yet.
     ///
     /// Call this from your audio-chunk loop:
     /// ```swift
     /// for await chunk in audioCaptureManager.audioChunks {
     ///     let segs = try await transcriptionManager.transcribe(samples: chunk)
-    ///     // segs is empty until a 5-second window is ready
+    ///     // segs is empty until at least one 5-second window is ready
     /// }
     /// ```
     func transcribe(samples: [Float]) async throws -> [TranscriptSegment] {
@@ -79,32 +81,40 @@ final class TranscriptionManager: ObservableObject {
 
         sampleBuffer.append(contentsOf: samples)
 
-        guard sampleBuffer.count >= Self.windowSize else {
-            return []
-        }
+        var allSegments: [TranscriptSegment] = []
 
-        // Take exactly one window; leave the remainder for the next call.
-        let window = Array(sampleBuffer.prefix(Self.windowSize))
-        sampleBuffer.removeFirst(Self.windowSize)
+        while sampleBuffer.count >= Self.windowSize {
+            // Take exactly one window; leave the remainder for the next iteration.
+            let window = Array(sampleBuffer.prefix(Self.windowSize))
+            sampleBuffer.removeFirst(Self.windowSize)
 
-        let results = try await wk.transcribe(audioArray: window)
+            let results = try await wk.transcribe(audioArray: window)
 
-        return results.flatMap { result in
-            result.segments.map { seg in
-                TranscriptSegment(
-                    id: UUID(),
-                    text: seg.text,
-                    startTime: seg.start,
-                    endTime: seg.end
-                )
+            let segments = results.flatMap { result in
+                result.segments.map { seg in
+                    TranscriptSegment(
+                        id: UUID(),
+                        text: seg.text,
+                        startTime: seg.start,
+                        endTime: seg.end
+                    )
+                }
             }
+            allSegments.append(contentsOf: segments)
         }
+
+        return allSegments
     }
 
     /// Flushes whatever remains in the buffer (< 5 s) through WhisperKit.
     /// Call this when recording stops to capture the tail of the audio.
+    ///
+    /// Throws `TranscriptionError.modelNotLoaded` if the model has not been
+    /// loaded, matching the behaviour of `transcribe(samples:)`.
     func flush() async throws -> [TranscriptSegment] {
-        guard let wk = whisperKit else { return [] }
+        guard let wk = whisperKit else {
+            throw TranscriptionError.modelNotLoaded
+        }
         guard !sampleBuffer.isEmpty else { return [] }
 
         let window = sampleBuffer
