@@ -7,6 +7,7 @@ final class AudioRingBuffer {
 
     private var buffer: [Float]
     private var writeIndex: Int = 0
+    private var readIndex: Int = 0
     private var count: Int = 0
     private let lock = NSLock()
 
@@ -25,27 +26,31 @@ final class AudioRingBuffer {
             writeIndex = (writeIndex + 1) % Self.capacity
             if count < Self.capacity {
                 count += 1
+            } else {
+                // Overwrite oldest: advance readIndex to stay consistent
+                readIndex = (readIndex + 1) % Self.capacity
             }
         }
     }
 
-    /// Returns the next `count` samples in order, or nil if fewer are available.
+    /// Returns the next `count` samples in order and advances the read pointer.
+    /// Returns nil if fewer than `requestedCount` samples are available.
     func read(count requestedCount: Int) -> [Float]? {
         lock.lock()
         defer { lock.unlock() }
 
         guard requestedCount > 0, count >= requestedCount else { return nil }
 
-        // readIndex is the oldest sample position
-        let readIndex = (writeIndex - count + Self.capacity) % Self.capacity
         var result = [Float](repeating: 0, count: requestedCount)
         for i in 0..<requestedCount {
             result[i] = buffer[(readIndex + i) % Self.capacity]
         }
+        readIndex = (readIndex + requestedCount) % Self.capacity
+        count -= requestedCount
         return result
     }
 
-    /// Number of samples currently stored.
+    /// Number of samples currently available to read.
     var availableCount: Int {
         lock.lock()
         defer { lock.unlock() }

@@ -1,3 +1,4 @@
+import Accelerate
 import AVFoundation
 import ScreenCaptureKit
 
@@ -9,14 +10,18 @@ final class AudioCaptureManager: NSObject, @unchecked Sendable {
     // MARK: - Public
 
     /// Delivers 1 600-sample (100 ms @ 16 kHz) mono Float32 chunks.
-    private(set) var audioChunks: AsyncStream<[Float]>!
-    private var continuation: AsyncStream<[Float]>.Continuation?
+    let audioChunks: AsyncStream<[Float]>
+    private let continuation: AsyncStream<[Float]>.Continuation
 
     // MARK: - Private
 
-    private let ringBuffer = AudioRingBuffer()
-    private let chunkSize  = 1_600          // 100 ms × 16 000 Hz
+    private let chunkSize: Int = 1_600          // 100 ms × 16 000 Hz
     private let targetRate: Double = 16_000
+
+    // Separate staging buffers for each source — protected by stagingLock
+    private var systemStagingBuffer: [Float] = []
+    private var micStagingBuffer: [Float] = []
+    private let stagingLock = NSLock()
 
     // SCStream
     private var scStream: SCStream?
@@ -28,10 +33,10 @@ final class AudioCaptureManager: NSObject, @unchecked Sendable {
     // MARK: - Init
 
     override init() {
+        let (stream, cont) = AsyncStream<[Float]>.makeStream()
+        audioChunks = stream
+        continuation = cont
         super.init()
-        audioChunks = AsyncStream { [weak self] cont in
-            self?.continuation = cont
-        }
     }
 
     // MARK: - Public API
@@ -51,8 +56,7 @@ final class AudioCaptureManager: NSObject, @unchecked Sendable {
         Task {
             try? await stream?.stopCapture()
         }
-        continuation?.finish()
-        continuation = nil
+        continuation.finish()
     }
 
     // MARK: - Permission
@@ -159,21 +163,43 @@ final class AudioCaptureManager: NSObject, @unchecked Sendable {
         }
 
         guard convError == nil else { return }
-        drainToChunks(pcmBufferToFloats(outputBuffer))
+        appendAndDrain(pcmBufferToFloats(outputBuffer), source: .mic)
     }
 
     // MARK: - Mix + Deliver
 
-    /// Writes samples into the ring buffer and emits full 100 ms chunks.
-    private func drainToChunks(_ samples: [Float]) {
-        ringBuffer.write(samples)
-        while ringBuffer.availableCount >= chunkSize {
-            if let chunk = ringBuffer.read(count: chunkSize) {
-                continuation?.yield(chunk)
-            } else {
-                break
-            }
+    private enum AudioSource { case system, mic }
+
+    /// Appends new samples to the appropriate staging buffer, then emits mixed
+    /// chunks whenever both buffers contain at least `chunkSize` samples.
+    private func appendAndDrain(_ samples: [Float], source: AudioSource) {
+        stagingLock.lock()
+        switch source {
+        case .system: systemStagingBuffer.append(contentsOf: samples)
+        case .mic:    micStagingBuffer.append(contentsOf: samples)
         }
+
+        while systemStagingBuffer.count >= chunkSize && micStagingBuffer.count >= chunkSize {
+            let sysChunk = Array(systemStagingBuffer.prefix(chunkSize))
+            let micChunk = Array(micStagingBuffer.prefix(chunkSize))
+            systemStagingBuffer.removeFirst(chunkSize)
+            micStagingBuffer.removeFirst(chunkSize)
+
+            stagingLock.unlock()
+
+            // Sum with vDSP_vadd, then clamp to [-1, 1] with vDSP_vclip
+            var mixed = [Float](repeating: 0, count: chunkSize)
+            vDSP_vadd(sysChunk, 1, micChunk, 1, &mixed, 1, vDSP_Length(chunkSize))
+
+            var low: Float  = -1.0
+            var high: Float =  1.0
+            vDSP_vclip(mixed, 1, &low, &high, &mixed, 1, vDSP_Length(chunkSize))
+
+            continuation.yield(mixed)
+
+            stagingLock.lock()
+        }
+        stagingLock.unlock()
     }
 
     // MARK: - Helpers
@@ -213,7 +239,7 @@ extension AudioCaptureManager: SCStreamOutput {
     ) {
         guard type == .audio else { return }
         guard let samples = extractFloats(from: sampleBuffer) else { return }
-        drainToChunks(samples)
+        appendAndDrain(samples, source: .system)
     }
 }
 
