@@ -1,17 +1,25 @@
-node_modules
-dist
-out
+# macOS
 .DS_Store
-.eslintcache
-*.log*
 
-# Python
-python/.venv/
-__pycache__/
-*.py[cod]
-*.pyo
-.pytest_cache/
+# Xcode
+*.xcodeproj/xcuserdata/
+*.xcworkspace/xcuserdata/
+DerivedData/
+*.pbxuser
+*.mode1v3
+*.mode2v3
+*.perspectivefile
+*.xccheckout
+xcuserdata/
+*.xcuserstate
+*.xcscmblueprint
 
-# Swift build artifacts
-swift/AudioCapture/.build/
-swift/AudioCapture/*.resolved
+# Swift Package Manager
+.build/
+*.resolved
+
+# ML Models (downloaded on first launch, not committed)
+MeetingMinutes/Models/
+
+# Logs
+*.log
