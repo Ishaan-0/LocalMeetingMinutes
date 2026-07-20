@@ -11,6 +11,8 @@
 		5E9ADD8A5E554711AB99C368 /* AppState.swift in Sources */ = {isa = PBXBuildFile; fileRef = DBB672C43D7A43AD81BE4F0E /* AppState.swift */; };
 		A06AF5CD882C4E598B7B36B7 /* MenuBarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EFE04F486CD4B9F80B1FEB9 /* MenuBarView.swift */; };
 		ED543E35BB314E1BBC90B26E /* WhisperKit in Frameworks */ = {isa = PBXBuildFile; productRef = B1834720DBCD4A01A4CD53BA /* WhisperKit */; };
+		AA11BB22CC33DD44EE55FF66 /* AudioRingBuffer.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA11BB22CC33DD44EE55FF01 /* AudioRingBuffer.swift */; };
+		AA11BB22CC33DD44EE55FF67 /* AudioCaptureManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA11BB22CC33DD44EE55FF02 /* AudioCaptureManager.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -20,6 +22,8 @@
 		9EFE04F486CD4B9F80B1FEB9 /* MenuBarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuBarView.swift; sourceTree = "<group>"; };
 		A042BB8E0286411DA3CD1C16 /* MeetingMinutes.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = MeetingMinutes.entitlements; sourceTree = "<group>"; };
 		B4275F32D1B9422E99AB51CA /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		AA11BB22CC33DD44EE55FF01 /* AudioRingBuffer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioRingBuffer.swift; sourceTree = "<group>"; };
+		AA11BB22CC33DD44EE55FF02 /* AudioCaptureManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioCaptureManager.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -62,11 +66,21 @@
 			isa = PBXGroup;
 			children = (
 				807BF055217C477C86E2F77A /* App */,
+				AA11BB22CC33DD44EE55FF03 /* Audio */,
 				FAEFE20428884A87BA3BF94F /* Views */,
 				A042BB8E0286411DA3CD1C16 /* MeetingMinutes.entitlements */,
 				B4275F32D1B9422E99AB51CA /* Info.plist */,
 			);
 			path = MeetingMinutes;
+			sourceTree = "<group>";
+		};
+		AA11BB22CC33DD44EE55FF03 /* Audio */ = {
+			isa = PBXGroup;
+			children = (
+				AA11BB22CC33DD44EE55FF01 /* AudioRingBuffer.swift */,
+				AA11BB22CC33DD44EE55FF02 /* AudioCaptureManager.swift */,
+			);
+			path = Audio;
 			sourceTree = "<group>";
 		};
 		807BF055217C477C86E2F77A /* App */ = {
@@ -163,6 +177,8 @@
 				5F571A6121904DBC904BB9F8 /* MeetingMinutesApp.swift in Sources */,
 				5E9ADD8A5E554711AB99C368 /* AppState.swift in Sources */,
 				A06AF5CD882C4E598B7B36B7 /* MenuBarView.swift in Sources */,
+				AA11BB22CC33DD44EE55FF66 /* AudioRingBuffer.swift in Sources */,
+				AA11BB22CC33DD44EE55FF67 /* AudioCaptureManager.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
