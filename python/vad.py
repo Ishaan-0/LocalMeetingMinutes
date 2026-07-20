@@ -4,7 +4,7 @@ import torch
 class VAD:
     def __init__(self, threshold: float = 0.5) -> None:
         self.threshold = threshold
-        self._model, self._utils = torch.hub.load(
+        self._model, _ = torch.hub.load(
             repo_or_dir="snakers4/silero-vad",
             model="silero_vad",
             force_reload=False,
