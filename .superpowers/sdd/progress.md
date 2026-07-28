@@ -1,27 +1,29 @@
-# MeetingMinutes SDD Progress Ledger
+# MeetingMinutes SDD Progress Ledger (Swift Rewrite)
 
-Plan: docs/superpowers/plans/2026-07-13-meeting-minutes.md
+Plan: docs/plan.md
 
 ## Tasks
 
-- [x] Task 1: Electron + Vite + React + TypeScript scaffold — commits 837a39b..7099d14
-- [x] Task 2: Shared TypeScript types — commit 399188a
-- [x] Task 3: Python project setup (hub.py stub + requirements.txt) — commit 09b3366
-- [x] Task 4: Merger (pure logic, test-first) — commit 09b3366
-- [x] Task 5: Ollama client — commit 09b3366
-- [x] Task 6: Notion client — commit c189c1e
-- [x] Task 7: VAD, transcriber, diarizer, audio receiver — commits 7bcf3de..6eece6c
-- [x] Task 8: WebSocket server + hub orchestrator — commits effd22d..7067035
-- [x] Task 9: Swift package + socket streamer — commit 47eedd4
-- [ ] Task 10: ScreenCaptureKit audio capture + main entry
-- [ ] Task 11: Session store + keychain + health check
-- [ ] Task 12: Process manager + IPC handlers + main entry
-- [ ] Task 13: App router + shared hooks
-- [ ] Task 14: Setup screen
-- [ ] Task 15: Home screen + source picker modal
-- [ ] Task 16: Recording screen
-- [ ] Task 17: Summary screen
-- [ ] Task 18: Bundle Python venv + package as .dmg
+- [x] Task 1: Xcode project + Swift package setup — commit fb91016, review clean
+- [x] Task 2: Audio capture manager — commits fb91016..7876b7b, review clean
+- [ ] Task 3: WhisperKit transcription — NEEDS RE-REVIEW (fixes committed f2a6a63, multi-window drain + removed @MainActor + flush() throws)
+- [ ] Task 4: Speaker diarization
+- [ ] Task 5: Segment merger
+- [ ] Task 6: Keychain + session store
+- [ ] Task 7: Ollama service
+- [ ] Task 8: Notion service
+- [ ] Task 9: Model download manager
+- [ ] Task 10: AppState + session coordinator
+- [ ] Task 11: Setup screen
+- [ ] Task 12: MenuBar + Home screen
+- [ ] Task 13: Recording screen
+- [ ] Task 14: Summary screen
+- [ ] Task 15: Packaging + entitlements
 
 ## Minor findings log
-(populated as reviews complete)
+- Task 1: `SWIFT_VERSION = 5.0` in pbxproj — should be bumped to `5.9` before any 5.9-specific syntax is used
+- Task 1: WhisperKit version floor spec-ambiguous (`upToNextMajorVersion(0.9.0)` vs spec's `1.0.0`) — identical resolved version (0.18.0), no action needed unless 1.0 ships
+- Task 1: `ARCHS` not locked to `arm64` in pbxproj (spec says Apple Silicon primary target)
+- Task 2: Buffer starvation if one audio source stalls (no zero-pad flush) — acceptable v1 debt
+- Task 2: `stagingLock` unlock/relock in drain loop — latent out-of-order emit under high concurrency
+- Task 2: `AudioRingBuffer` implemented but unused by `AudioCaptureManager` (staging arrays used instead)
